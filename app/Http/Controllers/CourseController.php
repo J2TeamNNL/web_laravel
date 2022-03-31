@@ -2,17 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Course\DestroyRequest;
+use App\Http\Requests\Course\StoreRequest;
+use App\Http\Requests\Course\UpdateRequest;
 use App\Models\Course;
 use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $data = Course::get();
+        $search = $request->get('q');
+        $data   = Course::query()
+            ->where('name', 'like', '%' . $search . '%')
+            ->paginate(2);
+        $data->appends(['q' => $search]);
 
         return view('course.index', [
-            'data' => $data,
+            'data'   => $data,
+            'search' => $search,
         ]);
     }
 
@@ -21,13 +29,13 @@ class CourseController extends Controller
         return view('course.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreRequest $request)
     {
         // $object = new Course();
-        // $object->fill($request->except('_token'));
+        // $object->fill($request->validated());
         // $object->save();
 
-        Course::create($request->except('_token'));
+        Course::create($request->validated());
 
         return redirect()->route('courses.index');
     }
@@ -39,7 +47,7 @@ class CourseController extends Controller
         ]);
     }
 
-    public function update(Request $request, Course $course)
+    public function update(UpdateRequest $request, Course $course)
     {
         // Course::query()->where('id', $course->id)->update(
         //     $request->except([
@@ -54,18 +62,18 @@ class CourseController extends Controller
         //     ])
         // );
 
-        $course->fill($request->except('_token'));
+        $course->fill($request->validated());
         $course->save();
 
-        return redirect()->route('course.index');
+        return redirect()->route('courses.index');
     }
 
-    public function destroy(Course $course)
+    public function destroy(DestroyRequest $request, $course)
     {
-        $course->delete();
-        // Course::destroy($course->id);
+        // $course->delete();
+        Course::destroy($course);
         // Course::where('id', $course->id)->delete();
 
-        return redirect()->route('course.index');
+        return redirect()->route('courses.index');
     }
 }
