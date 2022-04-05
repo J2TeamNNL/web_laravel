@@ -6,22 +6,28 @@ use App\Http\Requests\Course\DestroyRequest;
 use App\Http\Requests\Course\StoreRequest;
 use App\Http\Requests\Course\UpdateRequest;
 use App\Models\Course;
-use Illuminate\Http\Request;
+use Yajra\DataTables\DataTables;
 
 class CourseController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $search = $request->get('q');
-        $data   = Course::query()
-            ->where('name', 'like', '%' . $search . '%')
-            ->paginate(2);
-        $data->appends(['q' => $search]);
+        return view('course.index');
+    }
 
-        return view('course.index', [
-            'data'   => $data,
-            'search' => $search,
-        ]);
+    public function api()
+    {
+        return DataTables::of(Course::query())
+            ->editColumn('created_at', function ($object) {
+                return $object->year_created_at;
+            })
+            ->addColumn('edit', function ($object) {
+                return route('courses.edit', $object);
+            })
+            ->addColumn('destroy', function ($object) {
+                return route('courses.destroy', $object);
+            })
+            ->make(true);
     }
 
     public function create()
@@ -73,7 +79,10 @@ class CourseController extends Controller
         // $course->delete();
         Course::destroy($course);
         // Course::where('id', $course->id)->delete();
+        $arr = [];
+        $arr['status'] = true;
+        $arr['message'] = '';
 
-        return redirect()->route('courses.index');
+        return response($arr, 200);
     }
 }
