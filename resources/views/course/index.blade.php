@@ -29,6 +29,7 @@
                 <tr>
                     <th>#</th>
                     <th>Name</th>
+                    <th>Number Students</th>
                     <th>Created At</th>
                     <th>Edit</th>
                     <th>Delete</th>
@@ -95,7 +96,6 @@
                     } ),
                     'colvis'
                 ],
-                lengthMenu: [ 1, 25, 50, 75, 100 ],
                 processing: true,
                 serverSide: true,
                 ajax: '{!! route('courses.api') !!}',
@@ -105,6 +105,7 @@
                 columns: [
                     { data: 'id', name: 'id' },
                     { data: 'name', name: 'name' },
+                    { data: 'students_count', name: 'number_students' },
                     { data: 'created_at', name: 'created_at' },
                     {
                         data: 'edit',
