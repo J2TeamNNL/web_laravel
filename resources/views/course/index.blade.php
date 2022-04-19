@@ -32,7 +32,9 @@
                     <th>Number Students</th>
                     <th>Created At</th>
                     <th>Edit</th>
-                    <th>Delete</th>
+                    @if(checkSuperAdmin())
+                        <th>Delete</th>
+                    @endif
                 </tr>
                 </thead>
             </table>
@@ -118,6 +120,7 @@
                             </a>`;
                         }
                     },
+                    @if(checkSuperAdmin())
                     {
                         data: 'destroy',
                         targets: 4,
@@ -131,6 +134,7 @@
                             </form>`;
                         }
                     },
+                    @endif
                 ]
             });
 
