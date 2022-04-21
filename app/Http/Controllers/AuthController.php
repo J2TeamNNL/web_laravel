@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\UserRegisteredEvent;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Throwable;
 
 class AuthController extends Controller
@@ -17,9 +20,11 @@ class AuthController extends Controller
     {
         try {
             $user = User::query()
-                ->where('email',$request->get('email'))
-                ->where('password',$request->get('password'))
+                ->where('email', $request->get('email'))
                 ->firstOrFail();
+            if (!Hash::check($request->get('password'), $user->password)) {
+                throw new Exception('Invalid password');
+            }
 
             session()->put('id', $user->id);
             session()->put('name', $user->name);
@@ -30,7 +35,6 @@ class AuthController extends Controller
         } catch (Throwable $e) {
             return redirect()->route('login');
         }
-
     }
 
     public function logout()
@@ -38,5 +42,22 @@ class AuthController extends Controller
         session()->flush();
 
         return redirect()->route('login');
+    }
+
+    public function register()
+    {
+        return view('auth.register');
+    }
+
+    public function processRegister(Request $request)
+    {
+        $user = User::query()
+            ->create([
+                'name'     => $request->get('name'),
+                'email'    => $request->get('email'),
+                'password' => Hash::make($request->get('password')),
+                'level'    => 0,
+            ]);
+        UserRegisteredEvent::dispatch($user);
     }
 }
